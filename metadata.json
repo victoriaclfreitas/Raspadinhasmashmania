@@ -1,0 +1,6 @@
+{
+  "name": "Smash Mania - Raspadinha Digital",
+  "description": "Campanha promocional interativa com raspadinha digital, controle de estoque e painel administrativo integrado ao Supabase.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

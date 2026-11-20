@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smash Mania - Raspadinha Digital</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Canvas Confetti Library for Winning Effect -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Google Fonts: Montserrat & Bebas Neue for Urban Burger Joint Vibe -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              black: '#080808',
+              card: '#121212',
+              cardLight: '#1e1e1e',
+              red: '#ED2525',
+              redDark: '#b81414',
+              gold: '#FFD700',
+              goldDark: '#B8860B',
+            }
+          },
+          fontFamily: {
+            impact: ['"Bebas Neue"', 'sans-serif'],
+            sans: ['"Montserrat"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #080808;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #ED2525;
+    }
+
+    /* Shimmer effect for promo buttons */
+    .btn-glow {
+      box-shadow: 0 4px 25px rgba(237, 37, 37, 0.5);
+      transition: all 0.3s ease;
+    }
+    .btn-glow:hover {
+      box-shadow: 0 6px 35px rgba(237, 37, 37, 0.75);
+      transform: translateY(-2px);
+    }
+
+    /* Scratch Canvas Touch Action fix */
+    .scratch-canvas {
+      touch-action: none;
+      cursor: pointer;
+    }
+
+    /* Deep Warm Red Vignette Background matching exact screenshot colors */
+    .bg-dark-grid {
+      background-color: #0b0505;
+      background-image: 
+        radial-gradient(circle at 50% 25%, rgba(120, 15, 15, 0.35) 0%, rgba(35, 5, 5, 0.2) 45%, rgba(8, 8, 8, 1) 85%),
+        radial-gradient(rgba(237, 37, 37, 0.08) 1px, transparent 1px);
+      background-size: 100% 100%, 20px 20px;
+      background-position: 0 0, 0 0;
+    }
+  </style>
+</head>
+<body class="bg-brand-black text-white font-sans min-h-screen flex flex-col justify-between antialiased selection:bg-brand-red selection:text-white bg-dark-grid">
+
+  <!-- TOP HEADER / NAV -->
+  <header class="w-full bg-[#0d0707]/90 backdrop-blur border-b border-red-950/40 sticky top-0 z-40 px-4 py-3">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <!-- Logo Branding -->
+      <div class="flex items-center space-x-2 cursor-pointer" onclick="navigateTo('home')">
+        <div id="dynamic-logo-container" class="flex items-center gap-2">
+          <!-- Image Logo -->
+          <img id="header-logo-img" src="https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg" alt="Smash Mania" class="h-10 sm:h-12 w-auto object-contain rounded-md" onerror="this.src='https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg';" />
+        </div>
+      </div>
+
+      <!-- Badge (Apenas o selo oficial na parte superior) -->
+      <div class="flex items-center space-x-3">
+        <span class="inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-full bg-transparent text-[#e5b33a] border border-[#d4af37]/70 uppercase tracking-widest shadow-[0_0_10px_rgba(212,175,55,0.2)]">
+          PROMOÇÃO OFICIAL
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-grow flex items-center justify-center px-4 py-6 relative">
+    
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="toast-container" class="fixed top-16 right-4 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 1: LANDING & PHONE ENTRY -->
+    <!-- ================================================================= -->
+    <section id="view-home" class="w-full max-w-md mx-auto text-center space-y-5 animate-fade-in">
+      
+      <!-- Logo Hero Section -->
+      <div class="flex justify-center pt-1">
+        <img id="hero-logo-img" src="https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg" alt="Smash Mania" class="h-32 sm:h-40 w-auto object-contain drop-shadow-[0_12px_24px_rgba(237,37,37,0.35)] hover:scale-105 transition duration-300" onerror="this.src='https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg';" />
+      </div>
+
+      <!-- Promo Oval Badge & Header -->
+      <div class="space-y-2.5">
+        <div>
+          <span class="inline-block px-5 py-1 rounded-full border border-[#d4af37] text-[#e5b33a] text-xs font-bold tracking-widest uppercase shadow-[0_0_12px_rgba(212,175,55,0.25)]">
+            PROMOÇÃO OFICIAL
+          </span>
+        </div>
+        
+        <div class="text-[#e5b33a] font-bold text-sm tracking-widest uppercase pt-0.5">
+          TEM PRÊMIO NA ÁREA
+        </div>
+        
+        <h1 class="font-impact text-6xl sm:text-7xl text-white tracking-wider uppercase leading-none drop-shadow-lg">
+          RASPOU.<br/>
+          <span class="text-brand-red drop-shadow-[0_4px_15px_rgba(237,37,37,0.5)]">GANHOU?</span>
+        </h1>
+        
+        <p id="custom-home-subtitle" class="text-neutral-300 text-sm leading-relaxed max-w-xs mx-auto pt-1">
+          A sorte está no seu próximo smash. Digite seu WhatsApp e descubra o que preparamos pra você.
+        </p>
+      </div>
+
+      <!-- Main Phone Entry Form -->
+      <div class="w-full max-w-sm mx-auto space-y-3.5">
+        
+        <form id="phone-form" onsubmit="handlePhoneSubmit(event)" class="space-y-3.5">
+          <div>
+            <input 
+              type="text" 
+              id="phone-input" 
+              placeholder="(00) 00000-0000" 
+              maxlength="15"
+              inputmode="numeric"
+              required
+              oninput="formatPhone(this)"
+              class="w-full py-3.5 px-4 bg-[#111111]/90 border border-neutral-700/80 rounded-2xl text-white placeholder-neutral-600 focus:outline-none focus:border-brand-red font-impact text-2xl tracking-widest text-center transition shadow-inner"
+            />
+            <p id="phone-error-msg" class="text-xs text-brand-red hidden font-semibold mt-2">
+              <i class="fa-solid fa-circle-exclamation"></i> Por favor, insira um número de WhatsApp válido.
+            </p>
+          </div>
+
+          <button 
+            type="submit" 
+            id="btn-submit-phone"
+            class="w-full py-4 bg-brand-red hover:bg-brand-redDark text-white font-impact tracking-widest text-3xl uppercase rounded-2xl btn-glow transition-all duration-200 active:scale-95 shadow-xl"
+          >
+            QUERO RASPAR
+          </button>
+        </form>
+
+        <p class="text-[11px] text-neutral-400 leading-tight pt-1 flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-lock text-[#d4af37] text-[10px]"></i>
+          <span>Seu número é usado apenas para validar sua participação no resgate.</span>
+        </p>
+
+        <!-- Footer Copyright & Regulation Link -->
+        <div class="pt-4 text-xs text-neutral-400 space-y-1 font-impact tracking-wider">
+          <div class="text-neutral-300">© SMASH MANIA</div>
+          <div>
+            <button onclick="switchAdminTab('settings'); openAdminAuthModal();" class="text-neutral-400 hover:text-white transition text-[11px] font-sans">
+              ▼ Regulamento
+            </button>
+          </div>
+          <p class="text-[10px] text-neutral-500 font-sans leading-tight pt-2 max-w-xs mx-auto">
+            Promoção válida enquanto durarem os estoques. Limite de participações por telefone conforme regulamento.
+          </p>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 2: SCRATCHCARD GAME                                          -->
+    <!-- ================================================================= -->
+    <section id="view-scratch" class="w-full max-w-2xl mx-auto text-center space-y-5 hidden animate-fade-in">
+      
+      <div class="space-y-1">
+        <span class="text-xs font-bold text-brand-gold uppercase tracking-widest bg-brand-gold/10 px-3 py-1 rounded-full border border-brand-gold/20">
+          <i class="fa-solid fa-ticket"></i> Raspadinha Ativa
+        </span>
+        <h2 class="font-impact text-4xl sm:text-5xl text-white tracking-wide uppercase pt-2">
+          É HORA DE <span class="text-brand-red">RASPAR!</span>
+        </h2>
+        <p class="text-neutral-300 text-xs sm:text-sm font-semibold">
+          Encontre <span class="text-brand-gold font-bold uppercase">3 prêmios iguais</span> para ganhar!
+        </p>
+      </div>
+
+      <!-- Scratch Cards Grid (Always 3 Columns Side-by-Side on Mobile and Desktop) -->
+      <div class="grid grid-cols-3 gap-1.5 sm:gap-3 my-4 max-w-xl mx-auto">
+        
+        <!-- CARD 1 -->
+        <div class="relative bg-brand-card border border-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl aspect-square flex flex-col items-center justify-center p-1.5 sm:p-3">
+          <!-- Underlying Hidden Prize Result -->
+          <div id="prize-reveal-1" class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 text-center p-1 sm:p-3 z-0">
+            <div id="prize-icon-1" class="text-2xl sm:text-4xl mb-0.5 sm:mb-1 text-brand-gold">🎁</div>
+            <div id="prize-title-1" class="font-impact text-xs sm:text-2xl text-white uppercase leading-tight">...</div>
+            <div class="text-[8px] sm:text-[9px] text-neutral-400 mt-0.5 uppercase tracking-wider font-bold">Smash Mania</div>
+          </div>
+          <!-- Scratch Overlay Canvas -->
+          <canvas id="scratch-canvas-1" class="scratch-canvas relative z-10 w-full h-full rounded-lg sm:rounded-xl"></canvas>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="relative bg-brand-card border border-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl aspect-square flex flex-col items-center justify-center p-1.5 sm:p-3">
+          <!-- Underlying Hidden Prize Result -->
+          <div id="prize-reveal-2" class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 text-center p-1 sm:p-3 z-0">
+            <div id="prize-icon-2" class="text-2xl sm:text-4xl mb-0.5 sm:mb-1 text-brand-gold">🎁</div>
+            <div id="prize-title-2" class="font-impact text-xs sm:text-2xl text-white uppercase leading-tight">...</div>
+            <div class="text-[8px] sm:text-[9px] text-neutral-400 mt-0.5 uppercase tracking-wider font-bold">Smash Mania</div>
+          </div>
+          <!-- Scratch Overlay Canvas -->
+          <canvas id="scratch-canvas-2" class="scratch-canvas relative z-10 w-full h-full rounded-lg sm:rounded-xl"></canvas>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="relative bg-brand-card border border-neutral-800 rounded-xl sm:rounded-2xl overflow-hidden shadow-xl aspect-square flex flex-col items-center justify-center p-1.5 sm:p-3">
+          <!-- Underlying Hidden Prize Result -->
+          <div id="prize-reveal-3" class="absolute inset-0 flex flex-col items-center justify-center bg-neutral-900 text-center p-1 sm:p-3 z-0">
+            <div id="prize-icon-3" class="text-2xl sm:text-4xl mb-0.5 sm:mb-1 text-brand-gold">🎁</div>
+            <div id="prize-title-3" class="font-impact text-xs sm:text-2xl text-white uppercase leading-tight">...</div>
+            <div class="text-[8px] sm:text-[9px] text-neutral-400 mt-0.5 uppercase tracking-wider font-bold">Smash Mania</div>
+          </div>
+          <!-- Scratch Overlay Canvas -->
+          <canvas id="scratch-canvas-3" class="scratch-canvas relative z-10 w-full h-full rounded-lg sm:rounded-xl"></canvas>
+        </div>
+
+      </div>
+
+      <div class="bg-neutral-900/80 border border-neutral-800 rounded-xl p-3 text-xs text-neutral-400 flex items-center justify-center gap-2 max-w-md mx-auto">
+        <i class="fa-solid fa-hand-pointer text-brand-red animate-bounce"></i>
+        <span>Raspe os 3 quadradinhos até 60% para conferir seu resultado!</span>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- VIEW 3: ADMIN PANEL DASHBOARD                                     -->
+    <!-- ================================================================= -->
+    <section id="view-admin" class="w-full max-w-5xl mx-auto space-y-6 hidden animate-fade-in py-4">
+      
+      <!-- Admin Top Bar -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-brand-card border border-neutral-800 p-4 sm:p-6 rounded-2xl">
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="font-impact text-3xl text-white tracking-wide">PAINEL ADMINISTRATIVO</h2>
+            <span class="bg-brand-red text-white text-[10px] font-black px-2 py-0.5 rounded uppercase">Master</span>
+          </div>
+          <p class="text-xs text-neutral-400">Gerencie prêmios, parâmetros de campanha e relatórios de participações.</p>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button onclick="exportToCSV()" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Exportar CSV
+          </button>
+          <button onclick="navigateTo('home')" class="px-3.5 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-xs font-bold rounded-lg transition flex items-center gap-2">
+            <i class="fa-solid fa-arrow-left"></i> Voltar ao Site
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Navigation Tabs -->
+      <div class="flex border-b border-neutral-800 gap-2 overflow-x-auto pb-1">
+        <button onclick="switchAdminTab('prizes')" id="tab-btn-prizes" class="admin-tab-btn px-4 py-2 text-xs font-bold rounded-t-lg bg-brand-red text-white">
+          <i class="fa-solid fa-trophy mr-1.5"></i> Prêmios
+        </button>
+        <button onclick="switchAdminTab('participations')" id="tab-btn-participations" class="admin-tab-btn px-4 py-2 text-xs font-bold rounded-t-lg bg-neutral-900 text-neutral-400 hover:text-white">
+          <i class="fa-solid fa-users mr-1.5"></i> Participações e LGPD
+        </button>
+        <button onclick="switchAdminTab('branding')" id="tab-btn-branding" class="admin-tab-btn px-4 py-2 text-xs font-bold rounded-t-lg bg-neutral-900 text-neutral-400 hover:text-white">
+          <i class="fa-solid fa-palette mr-1.5"></i> Personalização da Marca
+        </button>
+        <button onclick="switchAdminTab('settings')" id="tab-btn-settings" class="admin-tab-btn px-4 py-2 text-xs font-bold rounded-t-lg bg-neutral-900 text-neutral-400 hover:text-white">
+          <i class="fa-solid fa-sliders mr-1.5"></i> Configurações da Campanha
+        </button>
+      </div>
+
+      <!-- TAB CONTENT 1: PRIZES MANAGEMENT -->
+      <div id="admin-tab-prizes" class="admin-tab-content space-y-4">
+        <div class="flex justify-between items-center bg-neutral-900 p-4 rounded-xl border border-neutral-800">
+          <h3 class="font-bold text-sm text-white flex items-center gap-2">
+            <i class="fa-solid fa-gift text-brand-gold"></i> Lista de Prêmios Configurados
+          </h3>
+          <button onclick="openPrizeModal()" class="px-3 py-1.5 bg-brand-red hover:bg-brand-redDark text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5">
+            <i class="fa-solid fa-plus"></i> Adicionar Prêmio
+          </button>
+        </div>
+
+        <div class="overflow-x-auto bg-brand-card border border-neutral-800 rounded-xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-neutral-900 text-neutral-400 font-bold border-b border-neutral-800 uppercase tracking-wider">
+              <tr>
+                <th class="p-3.5">Nome do Prêmio</th>
+                <th class="p-3.5 text-center">Estoque Restante</th>
+                <th class="p-3.5 text-center">Distribuídos</th>
+                <th class="p-3.5 text-center">Probabilidade (%)</th>
+                <th class="p-3.5 text-center">Status</th>
+                <th class="p-3.5 text-right">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="prizes-table-body" class="divide-y divide-neutral-800/60">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT 2: PARTICIPATIONS LOG -->
+      <div id="admin-tab-participations" class="admin-tab-content space-y-4 hidden">
+        <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-3 bg-neutral-900 p-4 rounded-xl border border-neutral-800">
+          <h3 class="font-bold text-sm text-white flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-brand-gold"></i> Histórico de Participantes (Telefone)
+          </h3>
+          <input 
+            type="text" 
+            id="search-phone" 
+            placeholder="Buscar por telefone..." 
+            onkeyup="filterParticipations()"
+            class="px-3 py-1.5 bg-neutral-800 border border-neutral-700 rounded-lg text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-brand-red"
+          />
+        </div>
+
+        <div class="overflow-x-auto bg-brand-card border border-neutral-800 rounded-xl max-h-96">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-neutral-900 text-neutral-400 font-bold border-b border-neutral-800 uppercase tracking-wider sticky top-0">
+              <tr>
+                <th class="p-3.5">Telefone / WhatsApp</th>
+                <th class="p-3.5">Data e Horário</th>
+                <th class="p-3.5">Resultado</th>
+                <th class="p-3.5">Prêmio Ganho</th>
+                <th class="p-3.5 text-center">Status do Resgate</th>
+                <th class="p-3.5 text-right">Ação</th>
+              </tr>
+            </thead>
+            <tbody id="participations-table-body" class="divide-y divide-neutral-800/60 font-mono">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB CONTENT 3: BRANDING & CUSTOMIZATION -->
+      <div id="admin-tab-branding" class="admin-tab-content space-y-4 hidden">
+        <form onsubmit="saveBrandingSettings(event)" class="bg-brand-card border border-neutral-800 p-6 rounded-xl space-y-4 max-w-2xl">
+          <h3 class="font-bold text-sm text-white border-b border-neutral-800 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-paint-roller text-brand-gold"></i> Personalizar Texto e Identidade Visual
+          </h3>
+          
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-neutral-400 mb-1">Nome da Hamburgueria / Marca</label>
+              <input type="text" id="cfg-brand-name" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-neutral-400 mb-1">URL / Caminho da Imagem da Logo</label>
+              <input type="text" id="cfg-brand-logo-url" placeholder="Ex: https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white" />
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-neutral-400 mb-1">Cor Principal (HEX)</label>
+              <div class="flex gap-2">
+                <input type="color" id="cfg-brand-color-picker" class="h-9 w-12 bg-neutral-900 border border-neutral-700 rounded cursor-pointer" onchange="document.getElementById('cfg-brand-color').value = this.value" />
+                <input type="text" id="cfg-brand-color" class="flex-grow px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white font-mono" />
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-neutral-400 mb-1">Subtítulo da Tela Inicial</label>
+              <textarea id="cfg-home-subtitle" rows="2" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="px-4 py-2 bg-brand-red hover:bg-brand-redDark text-white text-xs font-bold rounded-lg transition">
+            Salvar Alterações de Marca
+          </button>
+        </form>
+      </div>
+
+      <!-- TAB CONTENT 4: CAMPAIGN SETTINGS & LEGAL -->
+      <div id="admin-tab-settings" class="admin-tab-content space-y-4 hidden">
+        <form onsubmit="saveCampaignSettings(event)" class="bg-brand-card border border-neutral-800 p-6 rounded-xl space-y-4 max-w-2xl">
+          <h3 class="font-bold text-sm text-white border-b border-neutral-800 pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-gears text-brand-gold"></i> Regras e Controle da Campanha
+          </h3>
+
+          <div class="space-y-4">
+            <div class="flex items-center justify-between p-3 bg-neutral-900 rounded-lg border border-neutral-800">
+              <div>
+                <div class="text-xs font-bold text-white">Status da Campanha</div>
+                <div class="text-[11px] text-neutral-400">Ativar ou pausar a participação pública instantaneamente</div>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="cfg-campaign-active" class="sr-only peer">
+                <div class="w-11 h-6 bg-neutral-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-red"></div>
+              </label>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-neutral-400 mb-1">Limite Máximo de Participações por Telefone</label>
+              <input type="number" id="cfg-max-per-cpf" min="1" max="100" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-neutral-400 mb-1">Data de Início</label>
+                <input type="date" id="cfg-start-date" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white" />
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-neutral-400 mb-1">Data de Término</label>
+                <input type="date" id="cfg-end-date" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-xs text-white" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Brazilian Commercial Promotion Legal Warning Box -->
+          <div class="p-4 bg-amber-950/40 border border-amber-800/60 rounded-xl text-xs text-amber-200/90 space-y-1.5">
+            <div class="font-bold flex items-center gap-1.5 text-amber-400">
+              <i class="fa-solid fa-scale-balanced"></i> Nota de Conformidade Legal (Brasil / Secap SRE)
+            </div>
+            <p class="leading-relaxed text-[11px]">
+              Certifique-se de que a promoção comercial cumpre a Lei nº 5.768/71 e a Portaria SEAE/ME nº 7.638/2022. Caso trate-se de promoção comercial vinculada a compras ou sorteios sem valor de compra prévio, requisite a devida autorização/registro junto ao SPA/MF (Sistema de Controle de Promoção Comercial).
+            </p>
+          </div>
+
+          <button type="submit" class="px-4 py-2 bg-brand-red hover:bg-brand-redDark text-white text-xs font-bold rounded-lg transition">
+            Salvar Configurações da Campanha
+          </button>
+        </form>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ================================================================= -->
+  <!-- MODALS & OVERLAYS                                                 -->
+  <!-- ================================================================= -->
+
+  <!-- RESULT MODAL (WIN / LOSS) -->
+  <div id="modal-result" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden animate-fade-in">
+    <div class="bg-brand-card border border-neutral-800 rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl relative overflow-hidden">
+      <div id="modal-result-glow" class="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 bg-brand-red/20 blur-3xl pointer-events-none"></div>
+
+      <!-- Icon Header -->
+      <div id="result-icon-container" class="w-20 h-20 mx-auto rounded-full bg-brand-red/10 border border-brand-red/40 flex items-center justify-center text-4xl shadow-inner">
+        🎉
+      </div>
+
+      <!-- Main Result Text -->
+      <div class="space-y-1">
+        <div id="result-badge" class="text-xs font-black uppercase tracking-widest text-brand-gold">
+          PARABÉNS! VOCÊ GANHOU!
+        </div>
+        <h3 id="result-prize-title" class="font-impact text-3xl sm:text-4xl text-white uppercase leading-none pt-1">
+          1 SMASH GRÁTIS
+        </h3>
+        <p id="result-description" class="text-xs text-neutral-400 pt-2">
+          Apresente o código promocional abaixo ao fazer o seu pedido no balcão ou delivery.
+        </p>
+      </div>
+
+      <!-- Redemption Ticket Code Box (If Won) -->
+      <div id="redemption-box" class="bg-neutral-900 border border-dashed border-brand-gold/60 p-3 rounded-xl space-y-1">
+        <span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">CÓDIGO DE RESGATE ÚNICO</span>
+        <div id="redemption-code" class="font-mono font-black text-2xl text-brand-gold tracking-wider select-all">
+          SMASH-9482
+        </div>
+        <div class="text-[10px] text-neutral-400">Validade: 7 dias após emissão</div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="space-y-2 pt-2">
+        <a 
+          id="btn-whatsapp-claim"
+          href="#" 
+          target="_blank"
+          class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 shadow-lg"
+        >
+          <i class="fa-brands fa-whatsapp text-lg"></i>
+          <span>Resgatar pelo WhatsApp</span>
+        </a>
+
+        <button 
+          onclick="closeResultModal()" 
+          class="w-full py-2.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold text-xs rounded-xl transition"
+        >
+          Fechar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN AUTH MODAL -->
+  <div id="modal-admin-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-brand-card border border-neutral-800 rounded-2xl max-w-xs w-full p-6 text-center space-y-4 shadow-2xl relative">
+      <div class="w-12 h-12 bg-neutral-900 border border-neutral-700 rounded-full flex items-center justify-center text-brand-red mx-auto">
+        <i class="fa-solid fa-lock text-xl"></i>
+      </div>
+      <div>
+        <h3 class="font-impact text-2xl text-white">ACESSO ADMINISTRATIVO</h3>
+        <p class="text-xs text-neutral-400">Insira a senha do gerente para prosseguir.</p>
+      </div>
+      <form onsubmit="handleAdminLogin(event)" class="space-y-3">
+        <input 
+          type="password" 
+          id="admin-password-input"
+          placeholder="Senha de acesso" 
+          required
+          class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white text-center text-sm focus:outline-none focus:border-brand-red"
+        />
+        <div class="flex gap-2">
+          <button type="button" onclick="closeAdminAuthModal()" class="w-1/2 py-2 bg-neutral-800 text-neutral-300 text-xs font-bold rounded-lg">Cancelar</button>
+          <button type="submit" class="w-1/2 py-2 bg-brand-red text-white text-xs font-bold rounded-lg hover:bg-brand-redDark">Entrar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADD / EDIT PRIZE MODAL -->
+  <div id="modal-prize-form" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-brand-card border border-neutral-800 rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+      <div class="flex justify-between items-center border-b border-neutral-800 pb-3">
+        <h3 id="prize-modal-title" class="font-impact text-2xl text-white">ADICIONAR PRÊMIO</h3>
+        <button onclick="closePrizeModal()" class="text-neutral-500 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form onsubmit="handleSavePrize(event)" class="space-y-3 text-xs">
+        <input type="hidden" id="modal-prize-id" />
+        
+        <div>
+          <label class="block font-semibold text-neutral-400 mb-1">Nome do Prêmio</label>
+          <input type="text" id="modal-prize-name" placeholder="Ex: 1 Batata Grátis" required class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-semibold text-neutral-400 mb-1">Estoque Disponível</label>
+            <input type="number" id="modal-prize-qty" min="0" required class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white" />
+          </div>
+          <div>
+            <label class="block font-semibold text-neutral-400 mb-1">Probabilidade (%)</label>
+            <input type="number" id="modal-prize-prob" min="0" max="100" step="0.1" required class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-neutral-400 mb-1">Status de Ativação</label>
+          <select id="modal-prize-active" class="w-full px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-white">
+            <option value="true">Ativo</option>
+            <option value="false">Inativo</option>
+          </select>
+        </div>
+
+        <div class="pt-2 flex gap-2">
+          <button type="button" onclick="closePrizeModal()" class="w-1/2 py-2 bg-neutral-800 text-neutral-300 font-bold rounded-lg">Cancelar</button>
+          <button type="submit" class="w-1/2 py-2 bg-brand-red text-white font-bold rounded-lg hover:bg-brand-redDark">Salvar Prêmio</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="w-full bg-brand-card/90 border-t border-neutral-800/80 py-4 px-4 text-center text-xs text-neutral-500">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div>
+        © SMASH MANIA — Todos os direitos reservados.
+      </div>
+      <div class="flex items-center gap-4">
+        <button onclick="openAdminAuthModal()" class="hover:text-brand-red transition">Acesso Administrativo</button>
+        <span>•</span>
+        <span class="text-neutral-600">v1.0.4 PROMO</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ================================================================= -->
+  <!-- APPLICATION ENGINE & LOGIC (JAVASCRIPT)                           -->
+  <!-- ================================================================= -->
+  <script>
+    /* -------------------------------------------------------------------
+       1. INITIAL DEFAULT STATE & PERSISTENCE (LOCAL STORAGE)
+       ------------------------------------------------------------------- */
+    const DEFAULT_STATE = {
+      branding: {
+        name: "Smash Mania",
+        logoUrl: "https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg",
+        primaryColor: "#ED2525",
+        subtitle: "A sorte está no seu próximo smash. Digite seu WhatsApp e descubra o que preparamos pra você."
+      },
+      settings: {
+        active: true,
+        maxPerPhone: 1,
+        startDate: new Date().toISOString().split('T')[0],
+        endDate: new Date(Date.now() + 30*84600000).toISOString().split('T')[0],
+        adminPasswordHash: "1f33be0c885e3aa41c9f30b925b29c155c5c0a2ca3650228d49463cfa5d909ee" // "smash2026lud"
+      },
+      prizes: [
+        { id: "p1", name: "1 Smash Grátis", qty: 25, distributed: 4, probability: 10, active: true, isNoWin: false },
+        { id: "p2", name: "1 Batata Grátis", qty: 50, distributed: 12, probability: 20, active: true, isNoWin: false },
+        { id: "p3", name: "1 Refrigerante Grátis", qty: 100, distributed: 30, probability: 30, active: true, isNoWin: false },
+        { id: "p4", name: "10% de Desconto", qty: 200, distributed: 45, probability: 20, active: true, isNoWin: false },
+        { id: "p5", name: "Não foi dessa vez!", qty: 9999, distributed: 80, probability: 20, active: true, isNoWin: true }
+      ],
+      participations: []
+    };
+
+    function loadState() {
+      const saved = localStorage.getItem('smash_mania_promo_data');
+      if (!saved) return DEFAULT_STATE;
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        return DEFAULT_STATE;
+      }
+    }
+
+    function saveState(state) {
+      localStorage.setItem('smash_mania_promo_data', JSON.stringify(state));
+    }
+
+    let appState = loadState();
+
+    let currentSession = {
+      phone: "",
+      prizeOutcome: null,
+      cardResults: [],
+      cardsDone: [false, false, false],
+      revealed: false
+    };
+
+    function navigateTo(viewId) {
+      document.getElementById('view-home').classList.add('hidden');
+      document.getElementById('view-scratch').classList.add('hidden');
+      document.getElementById('view-admin').classList.add('hidden');
+
+      if (viewId === 'home') {
+        document.getElementById('view-home').classList.remove('hidden');
+      } else if (viewId === 'scratch') {
+        document.getElementById('view-scratch').classList.remove('hidden');
+      } else if (viewId === 'admin') {
+        document.getElementById('view-admin').classList.remove('hidden');
+        renderAdminTables();
+      }
+      window.scrollTo(0, 0);
+    }
+
+    function formatPhone(input) {
+      let value = input.value.replace(/\D/g, "");
+      if (value.length > 11) value = value.slice(0, 11);
+      
+      if (value.length > 10) {
+        value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+      } else if (value.length > 6) {
+        value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+      } else if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d{0,5}).*/, "($1) $2");
+      } else if (value.length > 0) {
+        value = value.replace(/^(\d{0,2}).*/, "($1");
+      }
+      
+      input.value = value;
+    }
+
+    /* Validação rigorosa: Exige obrigatoriamente 11 dígitos (DDD + 9 dígitos) */
+    function isValidPhone(phone) {
+      const clean = phone.replace(/\D/g, "");
+      return clean.length === 11;
+    }
+
+    function handlePhoneSubmit(e) {
+      e.preventDefault();
+      const phoneInput = document.getElementById('phone-input');
+      const rawPhone = phoneInput.value.trim();
+      const errEl = document.getElementById('phone-error-msg');
+
+      if (!appState.settings.active) {
+        showToast("A promoção está temporariamente pausada. Tente novamente mais tarde!", "warning");
+        return;
+      }
+
+      if (!isValidPhone(rawPhone)) {
+        errEl.classList.remove('hidden');
+        phoneInput.classList.add('border-brand-red');
+        showToast("Insira um número de WhatsApp válido com 11 dígitos (DDD + 9 dígitos).", "error");
+        return;
+      }
+      errEl.classList.add('hidden');
+      phoneInput.classList.remove('border-brand-red');
+
+      const cleanPhone = rawPhone.replace(/\D/g, "");
+      const maxLimit = appState.settings.maxPerPhone || 1;
+      const existingEntries = appState.participations.filter(p => p.cleanPhone === cleanPhone);
+      
+      if (existingEntries.length >= maxLimit) {
+        showToast(`Este número já atingiu o limite de ${maxLimit} participação(ões).`, "warning");
+        return;
+      }
+
+      const chosenPrize = computePrizeOutcome();
+
+      if (!chosenPrize) {
+        showToast("Desculpe! Não há mais raspadinhas ou prêmios disponíveis no momento.", "warning");
+        return;
+      }
+
+      let displayItems = [];
+      if (chosenPrize.isNoWin) {
+        const winnablePrizes = appState.prizes.filter(p => !p.isNoWin);
+        if (winnablePrizes.length >= 2) {
+          const prizeA = winnablePrizes[Math.floor(Math.random() * winnablePrizes.length)];
+          let prizeB = winnablePrizes[Math.floor(Math.random() * winnablePrizes.length)];
+          while (prizeB.id === prizeA.id && winnablePrizes.length > 1) {
+            prizeB = winnablePrizes[Math.floor(Math.random() * winnablePrizes.length)];
+          }
+          displayItems = [prizeA, prizeA, prizeB];
+        } else {
+          displayItems = [chosenPrize, chosenPrize, chosenPrize];
+        }
+        displayItems.sort(() => Math.random() - 0.5);
+      } else {
+        displayItems = [chosenPrize, chosenPrize, chosenPrize];
+      }
+
+      currentSession.phone = rawPhone;
+      currentSession.prizeOutcome = chosenPrize;
+      currentSession.cardResults = displayItems;
+      currentSession.cardsDone = [false, false, false];
+      currentSession.revealed = false;
+
+      chosenPrize.qty = Math.max(0, chosenPrize.qty - 1);
+      chosenPrize.distributed = (chosenPrize.distributed || 0) + 1;
+
+      appState.participations.push({
+        id: "part_" + Date.now(),
+        cleanPhone: cleanPhone,
+        displayPhone: rawPhone,
+        timestamp: new Date().toLocaleString('pt-BR'),
+        result: chosenPrize.isNoWin ? "Perdeu" : "Ganhou",
+        prizeName: chosenPrize.name,
+        redeemed: false,
+        redemptionCode: chosenPrize.isNoWin ? "-" : "SMASH-" + Math.floor(1000 + Math.random() * 9000)
+      });
+
+      saveState(appState);
+
+      initScratchcards();
+      navigateTo('scratch');
+      showToast("Raspadinha liberada! Raspe os 3 quadradinhos até 60%.", "success");
+    }
+
+    function computePrizeOutcome() {
+      const activePrizes = appState.prizes.filter(p => p.active && p.qty > 0);
+      if (activePrizes.length === 0) return null;
+
+      const totalProb = activePrizes.reduce((sum, p) => sum + Number(p.probability), 0);
+      let randomVal = Math.random() * totalProb;
+
+      for (let prize of activePrizes) {
+        if (randomVal < prize.probability) {
+          return prize;
+        }
+        randomVal -= prize.probability;
+      }
+
+      return activePrizes[activePrizes.length - 1];
+    }
+
+    function initScratchcards() {
+      for (let i = 1; i <= 3; i++) {
+        const item = currentSession.cardResults[i - 1];
+        const titleEl = document.getElementById(`prize-title-${i}`);
+        const iconEl = document.getElementById(`prize-icon-${i}`);
+        
+        titleEl.innerText = item.name;
+        iconEl.innerText = item.isNoWin ? "❌" : "🎁";
+
+        setupCanvas(`scratch-canvas-${i}`, i);
+      }
+    }
+
+    function setupCanvas(canvasId, cardIndex) {
+      const canvas = document.getElementById(canvasId);
+      canvas.style.display = "block";
+      canvas.style.opacity = "1";
+      
+      const container = canvas.parentElement;
+      const rect = container.getBoundingClientRect();
+      const width = Math.max(Math.floor(rect.width), 150);
+      const height = Math.max(Math.floor(rect.height), 150);
+      
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+
+      ctx.fillStyle = "#ED2525";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#121212";
+      const fontSize = canvas.width < 120 ? 10 : 14;
+      ctx.font = `900 ${fontSize}px Montserrat, sans-serif`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("RASPE ⚡", canvas.width / 2, canvas.height / 2);
+
+      let isDrawing = false;
+
+      function getBrushPos(e) {
+        const r = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: clientX - r.left,
+          y: clientY - r.top
+        };
+      }
+
+      function scratch(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+
+        const pos = getBrushPos(e);
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(pos.x, pos.y, 22, 0, Math.PI * 2);
+        ctx.fill();
+
+        checkScratchPercentage(canvas, ctx, cardIndex);
+      }
+
+      canvas.onmousedown = (e) => { isDrawing = true; scratch(e); };
+      canvas.onmousemove = scratch;
+      window.onmouseup = () => { isDrawing = false; };
+
+      canvas.ontouchstart = (e) => { isDrawing = true; scratch(e); };
+      canvas.ontouchmove = scratch;
+      canvas.ontouchend = () => { isDrawing = false; };
+    }
+
+    function checkScratchPercentage(canvas, ctx, cardIndex) {
+      if (currentSession.revealed) return;
+      if (!canvas || canvas.width <= 0 || canvas.height <= 0) return;
+
+      try {
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const pixels = imgData.data;
+        let transparentPixels = 0;
+
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i + 3] === 0) {
+            transparentPixels++;
+          }
+        }
+
+        const totalPixels = pixels.length / 4;
+        const clearedPercent = (transparentPixels / totalPixels) * 100;
+
+        if (clearedPercent >= 60) {
+          currentSession.cardsDone[cardIndex - 1] = true;
+
+          canvas.style.transition = "opacity 0.5s ease";
+          canvas.style.opacity = "0";
+          setTimeout(() => {
+            canvas.style.display = "none";
+          }, 500);
+
+          const allThreeDone = currentSession.cardsDone.every(status => status === true);
+          if (allThreeDone && !currentSession.revealed) {
+            currentSession.revealed = true;
+            setTimeout(() => {
+              triggerResultModal();
+            }, 600);
+          }
+        }
+      } catch (err) {
+        console.warn("Scratch check skipped:", err);
+      }
+    }
+
+    function triggerResultModal() {
+      const modal = document.getElementById('modal-result');
+      const prize = currentSession.prizeOutcome;
+      const lastParticipation = appState.participations[appState.participations.length - 1];
+
+      const iconBox = document.getElementById('result-icon-container');
+      const badge = document.getElementById('result-badge');
+      const title = document.getElementById('result-prize-title');
+      const desc = document.getElementById('result-description');
+      const redemptionBox = document.getElementById('redemption-box');
+      const codeEl = document.getElementById('redemption-code');
+      const whatsappBtn = document.getElementById('btn-whatsapp-claim');
+
+      if (prize.isNoWin) {
+        iconBox.innerHTML = "🍔";
+        badge.innerText = "QUE PENA!";
+        badge.className = "text-xs font-black uppercase tracking-widest text-neutral-400";
+        title.innerText = prize.name;
+        desc.innerText = "Não foi dessa vez! Mas não desanime, seu próximo Smash está te esperando.";
+        redemptionBox.classList.add('hidden');
+        whatsappBtn.classList.add('hidden');
+      } else {
+        iconBox.innerHTML = "🎉";
+        badge.innerText = "PARABÉNS! VOCÊ GANHOU!";
+        badge.className = "text-xs font-black uppercase tracking-widest text-brand-gold";
+        title.innerText = prize.name;
+        desc.innerText = "Apresente o código promocional no balcão ou envie no WhatsApp para resgatar!";
+        redemptionBox.classList.remove('hidden');
+        codeEl.innerText = lastParticipation ? lastParticipation.redemptionCode : "SMASH-PRMO";
+        
+        const validityEl = redemptionBox.querySelector('.text-\\[10px\\].text-neutral-400');
+        if (validityEl) {
+          validityEl.innerText = "Validade: 7 dias após emissão";
+        }
+        
+        const textMessage = encodeURIComponent(`Olá Smash Mania! Ganhei na Raspadinha Digital! Meu prêmio: ${prize.name}. Código de resgate: ${lastParticipation.redemptionCode}`);
+        whatsappBtn.href = `https://wa.me/5562982606386?text=${textMessage}`;
+        whatsappBtn.classList.remove('hidden');
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 120,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeResultModal() {
+      document.getElementById('modal-result').classList.add('hidden');
+      navigateTo('home');
+    }
+
+    function openAdminAuthModal() {
+      document.getElementById('modal-admin-auth').classList.remove('hidden');
+    }
+
+    function closeAdminAuthModal() {
+      document.getElementById('modal-admin-auth').classList.add('hidden');
+    }
+
+    async function sha256(message) {
+      const msgBuffer = new TextEncoder().encode(message);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function handleAdminLogin(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-password-input').value.trim();
+      
+      if (input === "smash2026lud") {
+        closeAdminAuthModal();
+        document.getElementById('admin-password-input').value = "";
+        navigateTo('admin');
+        showToast("Autenticado com sucesso como Administrador!", "success");
+        return;
+      }
+
+      try {
+        const inputHash = await sha256(input);
+        if (inputHash === appState.settings.adminPasswordHash) {
+          closeAdminAuthModal();
+          document.getElementById('admin-password-input').value = "";
+          navigateTo('admin');
+          showToast("Autenticado com sucesso como Administrador!", "success");
+        } else {
+          showToast("Senha incorreta!", "error");
+        }
+      } catch (err) {
+        showToast("Senha incorreta!", "error");
+      }
+    }
+
+    function switchAdminTab(tabName) {
+      document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.admin-tab-btn').forEach(el => {
+        el.classList.remove('bg-brand-red', 'text-white');
+        el.classList.add('bg-neutral-900', 'text-neutral-400');
+      });
+
+      document.getElementById(`admin-tab-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`tab-btn-${tabName}`);
+      activeBtn.classList.add('bg-brand-red', 'text-white');
+      activeBtn.classList.remove('bg-neutral-900', 'text-neutral-400');
+    }
+
+    function renderAdminTables() {
+      const prizesTbody = document.getElementById('prizes-table-body');
+      prizesTbody.innerHTML = appState.prizes.map(p => `
+        <tr class="hover:bg-neutral-900/50 transition">
+          <td class="p-3.5 font-bold text-white">${p.name} ${p.isNoWin ? '<span class="text-[10px] bg-neutral-800 text-neutral-400 px-1.5 py-0.5 rounded ml-1">Sem Prêmio</span>' : ''}</td>
+          <td class="p-3.5 text-center font-bold text-neutral-300">${p.qty}</td>
+          <td class="p-3.5 text-center text-brand-gold font-bold">${p.distributed || 0}</td>
+          <td class="p-3.5 text-center">${p.probability}%</td>
+          <td class="p-3.5 text-center">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold ${p.active ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-red-950 text-red-400 border border-red-800'}">
+              ${p.active ? 'Ativo' : 'Inativo'}
+            </span>
+          </td>
+          <td class="p-3.5 text-right space-x-2">
+            <button onclick="editPrize('${p.id}')" class="text-neutral-400 hover:text-white"><i class="fa-solid fa-pen"></i></button>
+            ${!p.isNoWin ? `<button onclick="deletePrize('${p.id}')" class="text-neutral-500 hover:text-brand-red"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </td>
+        </tr>
+      `).join('');
+
+      renderParticipationsTable(appState.participations);
+
+      document.getElementById('cfg-brand-name').value = appState.branding.name;
+      document.getElementById('cfg-brand-logo-url').value = appState.branding.logoUrl || "https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg";
+      document.getElementById('cfg-brand-color').value = appState.branding.primaryColor;
+      document.getElementById('cfg-brand-color-picker').value = appState.branding.primaryColor;
+      document.getElementById('cfg-home-subtitle').value = appState.branding.subtitle;
+
+      document.getElementById('cfg-campaign-active').checked = appState.settings.active;
+      document.getElementById('cfg-max-per-cpf').value = appState.settings.maxPerPhone || 1;
+      document.getElementById('cfg-start-date').value = appState.settings.startDate;
+      document.getElementById('cfg-end-date').value = appState.settings.endDate;
+    }
+
+    function renderParticipationsTable(list) {
+      const tbody = document.getElementById('participations-table-body');
+      if (list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-neutral-500">Nenhuma participação registrada até o momento.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = list.map(item => `
+        <tr class="hover:bg-neutral-900/50 transition">
+          <td class="p-3.5 font-mono text-neutral-300">${item.displayPhone}</td>
+          <td class="p-3.5 text-neutral-400 text-[11px]">${item.timestamp}</td>
+          <td class="p-3.5">
+            <span class="font-bold ${item.result === 'Ganhou' ? 'text-emerald-400' : 'text-neutral-500'}">
+              ${item.result}
+            </span>
+          </td>
+          <td class="p-3.5 font-sans text-white">${item.prizeName}</td>
+          <td class="p-3.5 text-center">
+            <button onclick="toggleRedeemStatus('${item.id}')" class="px-2 py-1 rounded text-[10px] font-bold transition ${item.redeemed ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' : 'bg-amber-950 text-amber-400 border border-amber-800'}">
+              ${item.redeemed ? 'Resgatado' : 'Pendente'}
+            </button>
+          </td>
+          <td class="p-3.5 text-right font-mono text-brand-gold text-[11px]">${item.redemptionCode}</td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleRedeemStatus(id) {
+      const item = appState.participations.find(p => p.id === id);
+      if (item) {
+        item.redeemed = !item.redeemed;
+        saveState(appState);
+        renderParticipationsTable(appState.participations);
+        showToast("Status de resgate atualizado!", "success");
+      }
+    }
+
+    function filterParticipations() {
+      const query = document.getElementById('search-phone').value.toLowerCase();
+      const filtered = appState.participations.filter(p => 
+        p.displayPhone.toLowerCase().includes(query) || p.cleanPhone.includes(query)
+      );
+      renderParticipationsTable(filtered);
+    }
+
+    function openPrizeModal(prizeId = null) {
+      const modal = document.getElementById('modal-prize-form');
+      const title = document.getElementById('prize-modal-title');
+      
+      if (prizeId) {
+        const prize = appState.prizes.find(p => p.id === prizeId);
+        title.innerText = "EDITAR PRÊMIO";
+        document.getElementById('modal-prize-id').value = prize.id;
+        document.getElementById('modal-prize-name').value = prize.name;
+        document.getElementById('modal-prize-qty').value = prize.qty;
+        document.getElementById('modal-prize-prob').value = prize.probability;
+        document.getElementById('modal-prize-active').value = prize.active ? "true" : "false";
+      } else {
+        title.innerText = "ADICIONAR PRÊMIO";
+        document.getElementById('modal-prize-id').value = "";
+        document.getElementById('modal-prize-name').value = "";
+        document.getElementById('modal-prize-qty').value = "50";
+        document.getElementById('modal-prize-prob').value = "10";
+        document.getElementById('modal-prize-active').value = "true";
+      }
+      modal.classList.remove('hidden');
+    }
+
+    function closePrizeModal() {
+      document.getElementById('modal-prize-form').classList.add('hidden');
+    }
+
+    function handleSavePrize(e) {
+      e.preventDefault();
+      const id = document.getElementById('modal-prize-id').value;
+      const name = document.getElementById('modal-prize-name').value.trim();
+      const qty = parseInt(document.getElementById('modal-prize-qty').value);
+      const prob = parseFloat(document.getElementById('modal-prize-prob').value);
+      const active = document.getElementById('modal-prize-active').value === "true";
+
+      if (id) {
+        const p = appState.prizes.find(x => x.id === id);
+        if (p) {
+          p.name = name;
+          p.qty = qty;
+          p.probability = prob;
+          p.active = active;
+        }
+      } else {
+        appState.prizes.push({
+          id: "p_" + Date.now(),
+          name: name,
+          qty: qty,
+          distributed: 0,
+          probability: prob,
+          active: active,
+          isNoWin: false
+        });
+      }
+
+      saveState(appState);
+      closePrizeModal();
+      renderAdminTables();
+      showToast("Prêmio salvo com sucesso!", "success");
+    }
+
+    function deletePrize(id) {
+      if (confirm("Tem certeza que deseja excluir este prêmio?")) {
+        appState.prizes = appState.prizes.filter(p => p.id !== id);
+        saveState(appState);
+        renderAdminTables();
+        showToast("Prêmio removido com sucesso.", "info");
+      }
+    }
+
+    function editPrize(id) {
+      openPrizeModal(id);
+    }
+
+    function saveCampaignSettings(e) {
+      e.preventDefault();
+      appState.settings.active = document.getElementById('cfg-campaign-active').checked;
+      appState.settings.maxPerPhone = parseInt(document.getElementById('cfg-max-per-cpf').value) || 1;
+      appState.settings.startDate = document.getElementById('cfg-start-date').value;
+      appState.settings.endDate = document.getElementById('cfg-end-date').value;
+
+      saveState(appState);
+      showToast("Configurações da campanha atualizadas com sucesso!", "success");
+    }
+
+    function saveBrandingSettings(e) {
+      e.preventDefault();
+      appState.branding.name = document.getElementById('cfg-brand-name').value;
+      appState.branding.logoUrl = document.getElementById('cfg-brand-logo-url').value;
+      appState.branding.primaryColor = document.getElementById('cfg-brand-color').value;
+      appState.branding.subtitle = document.getElementById('cfg-home-subtitle').value;
+
+      saveState(appState);
+      applyBranding();
+      showToast("Configurações de marca atualizadas!", "success");
+    }
+
+    function applyBranding() {
+      const logoUrl = appState.branding.logoUrl || "https://i.ibb.co/m10SpFH/Logo-hamburgueria-moderno-3-2.jpg";
+      const headerLogoImg = document.getElementById('header-logo-img');
+      const heroLogoImg = document.getElementById('hero-logo-img');
+
+      if (headerLogoImg) { headerLogoImg.src = logoUrl; }
+      if (heroLogoImg) { heroLogoImg.src = logoUrl; }
+
+      document.getElementById('custom-home-subtitle').innerText = appState.branding.subtitle;
+    }
+
+    function exportToCSV() {
+      if (appState.participations.length === 0) {
+        showToast("Não há participações registradas para exportar.", "warning");
+        return;
+      }
+
+      let csv = "ID;Telefone;Data_Hora;Resultado;Premio;Status_Resgate;Codigo_Resgate\n";
+      appState.participations.forEach(p => {
+        csv += `"${p.id}";"${p.displayPhone}";"${p.timestamp}";"${p.result}";"${p.prizeName}";"${p.redeemed ? 'Resgatado' : 'Pendente'}";"${p.redemptionCode}"\n`;
+      });
+
+      const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `smash_mania_participacoes_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      showToast("Relatório CSV baixado com sucesso!", "success");
+    }
+
+    function showToast(message, type = "info") {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      
+      let borderCol = "border-neutral-700 bg-neutral-900 text-white";
+      let icon = "fa-circle-info text-sky-400";
+
+      if (type === "success") {
+        borderCol = "border-emerald-800 bg-emerald-950 text-white";
+        icon = "fa-circle-check text-emerald-400";
+      } else if (type === "error") {
+        borderCol = "border-brand-red bg-red-950 text-white";
+        icon = "fa-circle-xmark text-brand-red";
+      } else if (type === "warning") {
+        borderCol = "border-amber-800 bg-amber-950 text-white";
+        icon = "fa-triangle-exclamation text-amber-400";
+      }
+
+      toast.className = `p-3.5 rounded-xl border ${borderCol} shadow-2xl text-xs font-semibold flex items-center gap-3 transition transform translate-y-2 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `<i class="fa-solid ${icon} text-base"></i><span>${message}</span>`;
+
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-2', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    window.onload = function() {
+      applyBranding();
+      navigateTo('home');
+    };
+  </script>
+</body>
+</html>
