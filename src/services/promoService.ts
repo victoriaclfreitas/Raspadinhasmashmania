@@ -724,6 +724,66 @@ export async function adminToggleRedeemed(
   return error ? { ok: false, error: error.message } : { ok: true };
 }
 
+export async function adminDeleteParticipation(
+  adminPassword: string,
+  id: string,
+  status: DataStatus
+): Promise<{ ok: boolean; error?: string }> {
+  if (status.security.rpcReady) {
+    const { error } = await supabase.rpc('admin_delete_participation', {
+      p_password: adminPassword,
+      p_id: id,
+    });
+    if (error) {
+      if (isMissingFunctionError(error)) {
+        return {
+          ok: false,
+          error:
+            'Função admin_delete_participation não encontrada no Supabase. Execute o script SQL atualizado na aba "Segurança & RLS".',
+        };
+      }
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  }
+
+  const { error } = await supabase.from('participations').delete().eq('id', id);
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
+export async function adminClearParticipations(
+  adminPassword: string,
+  ids: string[] | null,
+  status: DataStatus
+): Promise<{ ok: boolean; error?: string }> {
+  if (status.security.rpcReady) {
+    const { error } = await supabase.rpc('admin_clear_participations', {
+      p_password: adminPassword,
+      p_ids: ids,
+    });
+    if (error) {
+      if (isMissingFunctionError(error)) {
+        return {
+          ok: false,
+          error:
+            'Função admin_clear_participations não encontrada no Supabase. Execute o script SQL atualizado na aba "Segurança & RLS".',
+        };
+      }
+      return { ok: false, error: error.message };
+    }
+    return { ok: true };
+  }
+
+  let query = supabase.from('participations').delete();
+  if (ids && ids.length > 0) {
+    query = query.in('id', ids);
+  } else {
+    query = query.neq('id', '');
+  }
+  const { error } = await query;
+  return error ? { ok: false, error: error.message } : { ok: true };
+}
+
 export async function adminSaveConfig(
   adminPassword: string,
   branding: BrandConfig,

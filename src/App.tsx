@@ -16,6 +16,8 @@ import { ResultModal } from './components/ResultModal';
 import { ScratchCardBoard } from './components/ScratchCardBoard';
 import {
   adminChangePassword,
+  adminClearParticipations,
+  adminDeleteParticipation,
   adminDeletePrize,
   adminSaveConfig,
   adminSavePrize,
@@ -296,6 +298,40 @@ export default function App() {
     showToast('Status de resgate atualizado!', 'success');
   };
 
+  const handleDeleteParticipation = async (id: string) => {
+    if (!adminSessionSecret) return;
+    const res = await adminDeleteParticipation(
+      adminSessionSecret,
+      id,
+      dataStatus
+    );
+    if (!res.ok) {
+      showToast(`Erro no Supabase: ${res.error}`, 'error');
+      return;
+    }
+    await refreshAdminView(adminSessionSecret, dataStatus);
+    showToast('Contato excluído com sucesso.', 'info');
+  };
+
+  const handleClearParticipations = async (ids: string[]) => {
+    if (!adminSessionSecret || ids.length === 0) return;
+    const deletingAll = ids.length === promoState.participations.length;
+    const res = await adminClearParticipations(
+      adminSessionSecret,
+      deletingAll ? null : ids,
+      dataStatus
+    );
+    if (!res.ok) {
+      showToast(`Erro no Supabase: ${res.error}`, 'error');
+      return;
+    }
+    await refreshAdminView(adminSessionSecret, dataStatus);
+    showToast(
+      `${ids.length} contato${ids.length > 1 ? 's' : ''} excluído${ids.length > 1 ? 's' : ''} com sucesso.`,
+      'info'
+    );
+  };
+
   const handleSaveBranding = async (branding: BrandConfig) => {
     if (!adminSessionSecret) return;
     const cleanBranding: BrandConfig = {
@@ -542,6 +578,8 @@ export default function App() {
             onSavePrize={handleSavePrize}
             onDeletePrize={handleDeletePrize}
             onToggleRedeemed={handleToggleRedeemed}
+            onDeleteParticipation={handleDeleteParticipation}
+            onClearParticipations={handleClearParticipations}
             onSaveBranding={handleSaveBranding}
             onSaveSettings={handleSaveSettings}
             onChangePassword={handleChangePassword}

@@ -51,6 +51,8 @@ interface AdminDashboardProps {
   onSavePrize: (prize: Prize) => Promise<void>;
   onDeletePrize: (id: string) => Promise<void>;
   onToggleRedeemed: (id: string) => Promise<void>;
+  onDeleteParticipation: (id: string) => Promise<void>;
+  onClearParticipations: (ids: string[]) => Promise<void>;
   onSaveBranding: (branding: BrandConfig) => Promise<void>;
   onSaveSettings: (settings: CampaignSettings) => Promise<void>;
   onChangePassword: (newPassword: string) => Promise<boolean>;
@@ -73,6 +75,8 @@ export function AdminDashboard({
   onSavePrize,
   onDeletePrize,
   onToggleRedeemed,
+  onDeleteParticipation,
+  onClearParticipations,
   onSaveBranding,
   onSaveSettings,
   onChangePassword,
@@ -85,6 +89,11 @@ export function AdminDashboard({
     'all' | 'won' | 'lost' | 'pending' | 'redeemed'
   >('all');
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [pendingDeletePartId, setPendingDeletePartId] = useState<string | null>(
+    null
+  );
+  const [confirmBulkDelete, setConfirmBulkDelete] = useState(false);
+  const [deletingParticipations, setDeletingParticipations] = useState(false);
   const [copiedSql, setCopiedSql] = useState(false);
 
   // Prize Modal State
@@ -618,7 +627,11 @@ export function AdminDashboard({
                 <button
                   key={key}
                   type="button"
-                  onClick={() => setPartFilter(key)}
+                  onClick={() => {
+                    setPartFilter(key);
+                    setConfirmBulkDelete(false);
+                    setPendingDeletePartId(null);
+                  }}
                   className={`min-h-[34px] px-3 py-1 rounded-lg text-xs font-bold transition whitespace-nowrap ${
                     partFilter === key
                       ? 'bg-brand-red text-white'
@@ -630,15 +643,76 @@ export function AdminDashboard({
               ))}
             </div>
 
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchPhone}
-                onChange={(e) => setSearchPhone(e.target.value)}
-                placeholder="Buscar por telefone..."
-                className="pl-8 pr-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-brand-red w-full lg:w-64"
-              />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 text-neutral-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchPhone}
+                  onChange={(e) => {
+                    setSearchPhone(e.target.value);
+                    setConfirmBulkDelete(false);
+                  }}
+                  placeholder="Buscar por telefone..."
+                  className="pl-8 pr-3 py-2 bg-neutral-800 border border-neutral-700 rounded-lg text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-brand-red w-full lg:w-64"
+                />
+              </div>
+
+              {filteredParticipations.length > 0 &&
+                (confirmBulkDelete ? (
+                  <div className="inline-flex items-center justify-between gap-2 px-3 py-1.5 bg-red-950/70 border border-red-800/80 rounded-lg text-xs">
+                    <span className="text-red-200 font-semibold whitespace-nowrap">
+                      Excluir {filteredParticipations.length} contato
+                      {filteredParticipations.length > 1 ? 's' : ''}?
+                    </span>
+                    <div className="inline-flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={deletingParticipations}
+                        onClick={async () => {
+                          setDeletingParticipations(true);
+                          try {
+                            await onClearParticipations(
+                              filteredParticipations.map((p) => p.id)
+                            );
+                            setConfirmBulkDelete(false);
+                            setPendingDeletePartId(null);
+                          } finally {
+                            setDeletingParticipations(false);
+                          }
+                        }}
+                        className="px-2.5 py-1 bg-brand-red hover:bg-brand-red-dark text-white text-[11px] font-bold rounded whitespace-nowrap disabled:opacity-60"
+                      >
+                        {deletingParticipations ? 'Excluindo...' : 'Confirmar'}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={deletingParticipations}
+                        onClick={() => setConfirmBulkDelete(false)}
+                        className="px-2.5 py-1 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 text-[11px] font-bold rounded whitespace-nowrap"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={deletingParticipations}
+                    onClick={() => {
+                      setConfirmBulkDelete(true);
+                      setPendingDeletePartId(null);
+                    }}
+                    className="min-h-[34px] inline-flex items-center justify-center gap-1.5 px-3 py-2 bg-neutral-800 hover:bg-red-950 text-neutral-200 hover:text-red-200 border border-neutral-700 hover:border-red-800/80 text-xs font-bold rounded-lg transition whitespace-nowrap shrink-0 disabled:opacity-60"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-brand-red" />
+                    <span>
+                      {partFilter === 'all' && !searchPhone.trim()
+                        ? `Excluir Contatos (${filteredParticipations.length})`
+                        : `Excluir Filtrados (${filteredParticipations.length})`}
+                    </span>
+                  </button>
+                ))}
             </div>
           </div>
 
@@ -652,13 +726,14 @@ export function AdminDashboard({
                   <th className="p-3.5">Prêmio</th>
                   <th className="p-3.5 text-center">Status do Resgate</th>
                   <th className="p-3.5 text-right">Código</th>
+                  <th className="p-3.5 text-right">Ações</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800/60">
                 {filteredParticipations.length === 0 ? (
                   <tr>
                     <td
-                      colSpan={6}
+                      colSpan={7}
                       className="p-6 text-center text-neutral-500 text-xs"
                     >
                       Nenhuma participação registrada até o momento.
@@ -721,6 +796,50 @@ export function AdminDashboard({
                       </td>
                       <td className="p-3.5 text-right font-mono tabular-nums text-[#FFD700] text-[11px]">
                         {item.redemptionCode}
+                      </td>
+                      <td className="p-3.5 text-right">
+                        {pendingDeletePartId === item.id ? (
+                          <div className="inline-flex items-center justify-end gap-1">
+                            <button
+                              type="button"
+                              disabled={deletingParticipations}
+                              onClick={async () => {
+                                setDeletingParticipations(true);
+                                try {
+                                  await onDeleteParticipation(item.id);
+                                  setPendingDeletePartId(null);
+                                } finally {
+                                  setDeletingParticipations(false);
+                                }
+                              }}
+                              className="px-2 py-1 bg-brand-red text-white text-[11px] font-bold rounded whitespace-nowrap disabled:opacity-60"
+                            >
+                              Confirmar
+                            </button>
+                            <button
+                              type="button"
+                              disabled={deletingParticipations}
+                              onClick={() => setPendingDeletePartId(null)}
+                              className="px-2 py-1 bg-neutral-800 text-neutral-300 text-[11px] font-bold rounded whitespace-nowrap"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={deletingParticipations}
+                            onClick={() => {
+                              setPendingDeletePartId(item.id);
+                              setConfirmBulkDelete(false);
+                            }}
+                            aria-label={`Excluir contato ${item.displayPhone}`}
+                            title="Excluir contato"
+                            className="p-2 text-neutral-500 hover:text-brand-red rounded-lg hover:bg-neutral-800 transition disabled:opacity-60"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))

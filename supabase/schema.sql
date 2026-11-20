@@ -478,6 +478,40 @@ $$;
 
 GRANT EXECUTE ON FUNCTION public.admin_toggle_redeemed(TEXT, TEXT, BOOLEAN) TO anon, authenticated;
 
+CREATE OR REPLACE FUNCTION public.admin_delete_participation(p_password TEXT, p_id TEXT)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM public._assert_admin(p_password);
+  DELETE FROM public.participations WHERE id = p_id;
+  RETURN true;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_delete_participation(TEXT, TEXT) TO anon, authenticated;
+
+CREATE OR REPLACE FUNCTION public.admin_clear_participations(p_password TEXT, p_ids TEXT[] DEFAULT NULL)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  PERFORM public._assert_admin(p_password);
+  IF p_ids IS NULL THEN
+    DELETE FROM public.participations;
+  ELSE
+    DELETE FROM public.participations WHERE id = ANY(p_ids);
+  END IF;
+  RETURN true;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.admin_clear_participations(TEXT, TEXT[]) TO anon, authenticated;
+
 CREATE OR REPLACE FUNCTION public.admin_save_config(
   p_password TEXT,
   p_brand_name TEXT,
